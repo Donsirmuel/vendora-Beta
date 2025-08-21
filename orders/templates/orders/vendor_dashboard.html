@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-3">Vendor Dashboard — Orders</h2>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Type</th>
+      <th>Asset</th>
+      <th>Amount</th>
+      <th>Fiat</th>
+      <th>Status</th>
+      <th>Transaction</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.id }}</td>
+      <td>{{ order.order_type|upper }}</td>
+      <td>{{ order.asset.code }}</td>
+      <td>{{ order.amount }}</td>
+      <td>{{ order.fiat_amount }}</td>
+      <td>{{ order.status }}</td>
+      <td>
+        {% if order.transaction %}
+          {{ order.transaction.status }}
+          {% if order.transaction.tx_hash %}<br><small>tx: {{ order.transaction.tx_hash }}</small>{% endif %}
+          {% if order.transaction.reference %}<br><small>ref: {{ order.transaction.reference }}</small>{% endif %}
+        {% else %}
+          Pending
+        {% endif %}
+      </td>
+      <td>
+        {% if order.status == "pending" %}
+          <button
+            class="btn btn-success btn-sm btn-complete"
+            data-url="{% url 'orders:complete_transaction' order.id %}"
+            data-order-id="{{ order.id }}"
+          >✅ Complete</button>
+
+          <button
+            class="btn btn-danger btn-sm btn-reject"
+            data-url="{% url 'orders:reject_transaction' order.id %}"
+            data-order-id="{{ order.id }}"
+          >❌ Reject</button>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Complete modal -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="completeForm" method="post">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Mark Order Completed</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Tx Hash (optional)</label>
+            <input name="tx_hash" class="form-control" placeholder="Blockchain tx hash (optional)">
+          </div>
+          <div class="mb-3">
+            <label>Reference (optional)</label>
+            <input name="reference" class="form-control" placeholder="Bank/reference (optional)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+          <button class="btn btn-vendora" type="submit">Mark Completed</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reject modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="rejectForm" method="post">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reject Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Reason for rejection</label>
+            <textarea name="reason" class="form-control" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+          <button class="btn btn-danger" type="submit">Reject Order</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // complete modal wiring
+  document.querySelectorAll('.btn-complete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const url = btn.getAttribute('data-url');
+      const form = document.getElementById('completeForm');
+      form.action = url;
+      const modal = new bootstrap.Modal(document.getElementById('completeModal'));
+      modal.show();
+    });
+  });
+
+  // reject modal wiring
+  document.querySelectorAll('.btn-reject').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const url = btn.getAttribute('data-url');
+      const form = document.getElementById('rejectForm');
+      form.action = url;
+      const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+      modal.show();
+    });
+  });
+</script>
+
+{% endblock %}

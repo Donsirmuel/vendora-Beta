@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Reject Order {{ order.id }}</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label>Reason</label>
+    <textarea name="reason" class="form-control" required></textarea>
+  </div>
+  <button class="btn btn-danger" type="submit">Reject</button>
+  <a href="{% url 'orders:vendor_dashboard' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
