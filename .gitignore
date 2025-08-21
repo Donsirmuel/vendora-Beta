@@ -1,31 +1,17 @@
 # Python
 *.pyc
-*.pyo
 __pycache__/
-*.pyd
-*.swp
 
-# Virtual environment
+# Environment
 .venv/
 env/
 venv/
 
 # Django
+*.sqlite3
 *.log
-*.pot
-*.pyc
-db.sqlite3
 media/
 staticfiles/
 
-# VSCode / IDEs
+# VSCode
 .vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Environment variables
-.env
-
-# MacOS
-.DS_Store
